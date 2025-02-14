@@ -1,18 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+'use strict';
 
 const BloodVesselSimulation = () => {
-  const [particleCount, setParticleCount] = useState(10);
-  const [vesselFragility, setVesselFragility] = useState(20);
-  const [collisionsPerSecond, setCollisionsPerSecond] = useState(0);
-  const canvasRef = useRef(null);
-  const particlesRef = useRef([]);
-  const collisionCountRef = useRef(0);
-  const lastTimeRef = useRef(Date.now());
+  const [particleCount, setParticleCount] = React.useState(10);
+  const [vesselFragility, setVesselFragility] = React.useState(20);
+  const [collisionsPerSecond, setCollisionsPerSecond] = React.useState(0);
+  const canvasRef = React.useRef(null);
+  const particlesRef = React.useRef([]);
+  const collisionCountRef = React.useRef(0);
+  const lastTimeRef = React.useRef(Date.now());
 
   const VESSEL_HEIGHT = 200;
   const PARTICLE_RADIUS = 4;
 
-  // Inicializa partículas
   const initParticles = (count) => {
     const particles = [];
     for (let i = 0; i < count; i++) {
@@ -26,7 +25,6 @@ const BloodVesselSimulation = () => {
     return particles;
   };
 
-  // Atualiza posição das partículas
   const updateParticles = (ctx, particles) => {
     const width = ctx.canvas.width;
     const height = VESSEL_HEIGHT;
@@ -35,34 +33,31 @@ const BloodVesselSimulation = () => {
       particle.x += particle.dx;
       particle.y += particle.dy;
 
-      // Verifica colisão com as paredes
       if (particle.y <= PARTICLE_RADIUS || particle.y >= height - PARTICLE_RADIUS) {
         particle.dy *= -1;
         collisionCountRef.current++;
       }
 
-      // Reposiciona partícula quando sai da tela
       if (particle.x >= width) {
         particle.x = 0;
       }
     });
   };
 
-  // Renderiza a cena
   const render = (ctx, particles) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    // Desenha o vaso sanguíneo
+    // Vaso sanguíneo
     ctx.fillStyle = '#ffebee';
     ctx.fillRect(0, 0, ctx.canvas.width, VESSEL_HEIGHT);
 
-    // Desenha bordas do vaso com opacidade baseada na fragilidade
+    // Bordas do vaso
     const borderOpacity = 0.3 + (vesselFragility / 100) * 0.7;
     ctx.fillStyle = `rgba(255, 0, 0, ${borderOpacity})`;
     ctx.fillRect(0, 0, ctx.canvas.width, 2);
     ctx.fillRect(0, VESSEL_HEIGHT - 2, ctx.canvas.width, 2);
 
-    // Desenha partículas
+    // Partículas
     particles.forEach(particle => {
       ctx.beginPath();
       ctx.arc(particle.x, particle.y, PARTICLE_RADIUS, 0, Math.PI * 2);
@@ -71,8 +66,7 @@ const BloodVesselSimulation = () => {
     });
   };
 
-  // Loop de animação
-  useEffect(() => {
+  React.useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     particlesRef.current = initParticles(particleCount);
@@ -82,7 +76,6 @@ const BloodVesselSimulation = () => {
       updateParticles(ctx, particlesRef.current);
       render(ctx, particlesRef.current);
 
-      // Atualiza contador de colisões por segundo
       const now = Date.now();
       if (now - lastTimeRef.current >= 1000) {
         setCollisionsPerSecond(collisionCountRef.current);
@@ -97,54 +90,75 @@ const BloodVesselSimulation = () => {
     return () => cancelAnimationFrame(animationFrameId);
   }, [particleCount, vesselFragility]);
 
-  return (
-    <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
-      <div className="w-full max-w-2xl">
-        <canvas 
-          ref={canvasRef} 
-          width={600} 
-          height={VESSEL_HEIGHT}
-          className="w-full bg-white rounded-lg shadow-md"
-        />
-        
-        <div className="mt-4 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Número de Partículas: {particleCount}
-            </label>
-            <input
-              type="range"
-              min="1"
-              max="50"
-              value={particleCount}
-              onChange={(e) => setParticleCount(Number(e.target.value))}
-              className="w-full mt-1"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Fragilidade da Parede: {vesselFragility}%
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={vesselFragility}
-              onChange={(e) => setVesselFragility(Number(e.target.value))}
-              className="w-full mt-1"
-            />
-          </div>
-
-          <div className="p-4 bg-white rounded-lg shadow">
-            <p className="text-lg font-semibold text-gray-800">
-              Colisões por segundo: {collisionsPerSecond}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+  return React.createElement('div', { style: { padding: '20px' } },
+    React.createElement('canvas', {
+      ref: canvasRef,
+      width: 600,
+      height: VESSEL_HEIGHT,
+      style: { 
+        width: '100%',
+        maxWidth: '600px',
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }
+    }),
+    React.createElement('div', { style: { marginTop: '20px' } },
+      React.createElement('div', { style: { marginBottom: '10px' } },
+        React.createElement('label', null, 
+          `Número de Partículas: ${particleCount}`
+        ),
+        React.createElement('input', {
+          type: 'range',
+          min: 1,
+          max: 50,
+          value: particleCount,
+          onChange: (e) => setParticleCount(Number(e.target.value)),
+          style: { width: '100%', marginTop: '5px' }
+        })
+      ),
+      React.createElement('div', { style: { marginBottom: '10px' } },
+        React.createElement('label', null, 
+          `Fragilidade da Parede: ${vesselFragility}%`
+        ),
+        React.createElement('input', {
+          type: 'range',
+          min: 0,
+          max: 100,
+          value: vesselFragility,
+          onChange: (e) => setVesselFragility(Number(e.target.value)),
+          style: { width: '100%', marginTop: '5px' }
+        })
+      ),
+      React.createElement('div', {
+        style: {
+          padding: '10px',
+          backgroundColor: '#f0f0f0',
+          borderRadius: '4px',
+          marginTop: '10px'
+        }
+      },
+        React.createElement('p', {
+          style: { margin: 0, fontWeight: 'bold' }
+        }, `Colisões por segundo: ${collisionsPerSecond}`)
+      )
+    )
   );
 };
 
-export default BloodVesselSimulation;
+const App = () => {
+  return React.createElement('div', null,
+    React.createElement('h1', { 
+      style: { 
+        textAlign: 'center',
+        color: '#333'
+      } 
+    }, 'Simulação de Partículas ApoB'),
+    React.createElement(BloodVesselSimulation)
+  );
+};
+
+ReactDOM.render(
+  React.createElement(App),
+  document.getElementById('root')
+);
